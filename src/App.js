@@ -1,26 +1,43 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import GoogleMap from './components/GoogleMap';
+import StationSearch from "./components/StationSearch";
+const parser = require('./lib/parser.js');
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+
+const googleMapsApiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+
+
+class App extends React.Component {
+    state = {
+        selectedPlaces: ''
+    }
+
+    findStation= (city) => {
+        if (city) {
+            const handler = (places) => {
+                this.setState({
+                    selectedPlaces: places
+                })
+            }
+            const api_call_url =`http://localhost:2020/maps/api/place/textsearch/json?query=gas_station+${city}&radius=1500&key=${googleMapsApiKey}`
+            fetch(api_call_url).then(res => res.json()).then(parser).then(handler)
+        }
+    }
+
+    render() {
+        return (
+            <div className="App">
+                <React.Fragment>
+                    <StationSearch searchCity={this.findStation}/>
+                    <GoogleMap gasStations={this.state.selectedPlaces} />
+
+                </React.Fragment>
+
+
+            </div>
+        );
+    }
 }
 
 export default App;
